@@ -1,0 +1,11 @@
+/target
+/artifacts
+/release
+**/*.rs.bk
+*.iml
+*.sw[opn]
+.idea
+.vscode
+schema/
+builds/
+Cargo.lock

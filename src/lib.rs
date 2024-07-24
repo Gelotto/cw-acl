@@ -1,0 +1,9 @@
+#[cfg(not(feature = "library"))]
+pub mod contract;
+#[cfg(not(feature = "library"))]
+pub mod execute;
+#[cfg(not(feature = "library"))]
+pub mod query;
+pub mod msg;
+pub mod error;
+pub mod state;

@@ -1,0 +1,68 @@
+#!/bin/bash
+
+NETWORK=$1
+SENDER=$2
+DEFAULT_TAG=$(cat builds/latest)
+BUILD_TAG=${3:-$DEFAULT_TAG}
+
+LABEL="contract-$(date +%s)"
+BUILD_DIR="./builds/build-$BUILD_TAG"
+FILE_TX_HASH="tx"
+FILE_CODE_ID="code-id"
+
+echo "using build dir $BUILD_DIR"
+CODE_ID=$(cat $BUILD_DIR/$FILE_CODE_ID)
+
+INSTANTIATE_MSG='{}'
+
+case $NETWORK in
+  devnet)
+    set -e
+    NODE="http://localhost:26657"
+    DENOM=ujunox
+    CHAIN_ID=testing
+    ;;
+  testnet)
+    NODE="https://rpc.uni.juno.deuslabs.fi:443"
+    DENOM=ujunox
+    CHAIN_ID=uni-3
+    ;;
+  mainnet)
+    NODE="https://juno.kingnodes.com:443"
+    DENOM=ujuno
+    CHAIN_ID=juno-1
+    ;;
+esac
+
+TXFLAG="--node $NODE --chain-id $CHAIN_ID --gas-prices 0.03$DENOM --gas auto --gas-adjustment 1.5 --admin $SENDER"
+
+instantiate() { 
+    CMD="junod tx wasm instantiate $CODE_ID $INSTANTIATE_MSG --label "$LABEL" --from $SENDER --output json -y $TXFLAG"
+    echo "$CMD"
+
+    RESULT=$($CMD)
+    echo "$RESULT" | jq
+
+    TXHASH=$(echo "$RESULT" | jq -r '.txhash')
+    echo $TXHASH >$BUILD_DIR/$FILE_TX_HASH
+    echo "waiting for transaction to finalize..."
+
+    CONTRACT_ADDR=""
+    while [[ $CONTRACT_ADDR == "" ]]
+    do
+        sleep 3
+        CONTRACT_ADDR=$(junod query tx $TXHASH --node $NODE --chain-id $CHAIN_ID --output json 2>/dev/null \
+            | jq -r '.logs[0].events[0].attributes[0].value')
+    done
+
+    SHORT_ADDR=$(echo $CONTRACT_ADDR | grep -Po '\w{7}$')
+    CONTRACTS_DIR="$BUILD_DIR/contracts"
+
+    mkdir -p "$CONTRACTS_DIR"
+
+    echo "contract address: $CONTRACT_ADDR"
+    echo $CONTRACT_ADDR >$CONTRACTS_DIR/$SHORT_ADDR
+    echo $CONTRACT_ADDR >$BUILD_DIR/latest-contract
+}
+
+instantiate
