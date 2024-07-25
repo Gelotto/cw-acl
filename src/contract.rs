@@ -10,7 +10,7 @@ use crate::execute::revoke_role::exec_revoke_role;
 use crate::execute::{set_operator::exec_set_operator, Context};
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg, RoleExecuteMsg};
 use crate::query::acl::query_acl;
-use crate::query::is_allowed::query_is_authorized as query_allowed;
+use crate::query::is_allowed::query_is_allowed as query_allowed;
 use crate::query::paths::query_paths;
 use crate::query::role::query_role;
 use crate::query::roles::query_roles;

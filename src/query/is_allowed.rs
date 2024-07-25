@@ -16,7 +16,7 @@ use super::ReadonlyContext;
 /// heirarchical, so for each path, we're checking first if the user is authed
 /// to the full path and then checking again if they are authed via any ancestor
 /// paths.
-pub fn query_is_authorized(
+pub fn query_is_allowed(
     ctx: ReadonlyContext,
     msg: IsAllowedParams,
 ) -> Result<bool, ContractError> {
