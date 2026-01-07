@@ -1,3 +1,12 @@
+//! # CosmWasm ACL Contract
+//!
+//! This contract implements a hierarchical Access Control List (ACL) system with support for:
+//! - Direct path authorization for principals
+//! - Role-based access control (RBAC)
+//! - Hierarchical path matching (parent paths authorize child paths)
+//! - Time-based authorization with TTL support
+//! - Operator delegation to another ACL contract
+
 use crate::client::ensure_is_allowed;
 use crate::error::ContractError;
 use crate::execute::allow::exec_allow;
@@ -23,6 +32,9 @@ use cw2::set_contract_version;
 const CONTRACT_NAME: &str = "crates.io:cw-acl";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
+/// Initializes the ACL contract with an operator and optional metadata.
+///
+/// The operator (default: message sender) is the only entity authorized to modify the ACL.
 #[entry_point]
 pub fn instantiate(
     deps: DepsMut,
@@ -34,6 +46,10 @@ pub fn instantiate(
     Ok(state::init(Context { deps, env, info }, msg)?)
 }
 
+/// Executes ACL modifications. Only callable by the operator.
+///
+/// The operator can be either a direct address or another ACL contract. If an ACL,
+/// the sender must be authorized to the path `/acls/{this_contract_address}`.
 #[entry_point]
 pub fn execute(
     deps: DepsMut,
@@ -63,6 +79,7 @@ pub fn execute(
     }
 }
 
+/// Queries ACL data. All queries are read-only and do not modify state.
 #[entry_point]
 pub fn query(
     deps: Deps,
@@ -80,6 +97,7 @@ pub fn query(
     Ok(result)
 }
 
+/// Migrates the contract to a new version.
 #[entry_point]
 pub fn migrate(
     deps: DepsMut,

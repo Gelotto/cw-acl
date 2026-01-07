@@ -1,3 +1,7 @@
+//! # Remove Role
+//!
+//! Completely deletes a role and all its path associations.
+
 use crate::{
     error::ContractError,
     state::{PATH_ROLES, ROLE_INFOS, ROLE_PATHS},
@@ -7,12 +11,18 @@ use cosmwasm_std::{attr, Order, Response};
 
 use super::Context;
 
+/// Removes a role entirely, cleaning up all path associations.
+///
+/// Note: This does NOT remove principal-role grants. Principals will still
+/// have the role in their records, but it will be meaningless since the role
+/// info and paths are deleted.
 pub fn exec_remove_role(
     ctx: Context,
     role: String,
 ) -> Result<Response, ContractError> {
     let Context { deps, .. } = ctx;
 
+    // Collect all paths first to avoid mutating while iterating
     let paths_to_remove: Vec<String> = PATH_ROLES
         .prefix(&role)
         .keys(deps.storage, None, None, Order::Ascending)

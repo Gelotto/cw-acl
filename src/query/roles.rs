@@ -1,3 +1,7 @@
+//! # Roles Query
+//!
+//! Lists all roles or roles for a specific principal.
+
 use cosmwasm_std::Order;
 
 use crate::{

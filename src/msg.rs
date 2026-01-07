@@ -1,3 +1,7 @@
+//! # Message Types
+//!
+//! Defines all InstantiateMsg, ExecuteMsg, and QueryMsg types for the ACL contract.
+
 use cosmwasm_schema::cw_serde;
 
 use crate::client::Operator;
@@ -48,7 +52,7 @@ pub enum QueryMsg {
     Role(String),
     /// List paths autorized to a principal, role, or the ACL as whole.
     Paths(PathsQueryParams),
-    /// Text if a given principal is allowed with respect to one or more paths.
+    /// Test if a given principal is allowed with respect to one or more paths.
     IsAllowed(IsAllowedParams),
 }
 
@@ -121,9 +125,12 @@ pub enum AuthResource {
     Path(String),
 }
 
+/// Defines how multiple path checks are combined in IsAllowed queries.
 #[cw_serde]
 pub enum TestRequirement {
+    /// At least one path must be authorized (OR logic)
     Any,
+    /// All paths must be authorized (AND logic)
     All,
 }
 

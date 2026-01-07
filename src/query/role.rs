@@ -1,3 +1,7 @@
+//! # Role Query
+//!
+//! Returns metadata for a specific role.
+
 use crate::{
     error::ContractError, models::AuthRoleInfo, responses::RoleResponse, state::ROLE_INFOS,
 };

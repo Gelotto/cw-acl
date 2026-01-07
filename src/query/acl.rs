@@ -1,3 +1,7 @@
+//! # ACL Metadata Query
+//!
+//! Returns ACL configuration and metadata.
+
 use crate::{
     error::ContractError,
     models::Config,

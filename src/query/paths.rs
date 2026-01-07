@@ -1,3 +1,10 @@
+//! # Paths Query
+//!
+//! Lists paths with pagination support for ACL, roles, or principals.
+//!
+//! Uses `Box<String>` to keep bound references valid across the function scope,
+//! as `Bound` requires a reference that lives long enough.
+
 use std::marker::PhantomData;
 
 use cosmwasm_std::Order;

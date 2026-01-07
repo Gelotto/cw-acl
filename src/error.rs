@@ -1,3 +1,7 @@
+//! # Contract Error Types
+//!
+//! Custom error types for the ACL contract, convertible to StdError.
+
 use cosmwasm_std::StdError;
 use thiserror::Error;
 

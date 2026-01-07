@@ -1,14 +1,23 @@
+//! # Allow Path to Principal
+//!
+//! Grants direct path authorization to a principal with optional TTL.
+
 use crate::{
     error::ContractError,
     models::AuthRecord,
     msg::AllowMsg,
     state::{PATH_REF_COUNTS, PRINCIPAL_PATH_AUTHORIZATIONS},
-    utils::to_cannonical_path,
+    utils::to_canonical_path,
 };
 use cosmwasm_std::{attr, Response};
 
 use super::Context;
 
+/// Authorizes a principal to access a specific path.
+///
+/// Creates both:
+/// - Path reference count entry (or increments existing)
+/// - Principal-path authorization record with optional expiration
 pub fn exec_allow(
     ctx: Context,
     msg: AllowMsg,
@@ -24,15 +33,15 @@ pub fn exec_allow(
         expires_at: ttl.and_then(|n| Some(env.block.time.plus_seconds(n.into()))),
     };
 
-    let cannonical_path = to_cannonical_path(&path);
+    let canonical_path = to_canonical_path(&path);
 
-    PATH_REF_COUNTS.save(deps.storage, &cannonical_path, &0)?;
-    PRINCIPAL_PATH_AUTHORIZATIONS.save(deps.storage, (&principal, &cannonical_path), &auth)?;
+    PATH_REF_COUNTS.save(deps.storage, &canonical_path, &0)?;
+    PRINCIPAL_PATH_AUTHORIZATIONS.save(deps.storage, (&principal, &canonical_path), &auth)?;
 
     Ok(Response::new().add_attributes(vec![
         attr("action", "allow"),
         attr("principal", principal),
-        attr("path", cannonical_path),
+        attr("path", canonical_path),
         attr(
             "expires_at",
             auth.expires_at

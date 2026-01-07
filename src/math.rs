@@ -1,6 +1,16 @@
+//! # Overflow-Safe Math Operations
+//!
+//! Provides checked arithmetic operations that return ContractError on overflow.
+//! These wrappers convert standard overflow errors into our contract error type.
+//!
+//! Note: Many functions in this module are currently unused but provided for
+//! future extensibility and consistency across numeric types.
+
 use cosmwasm_std::{Int256, OverflowError, OverflowOperation, StdError, Uint128, Uint256, Uint64};
 
 use crate::error::ContractError;
+
+// === u256 operations ===
 
 pub fn mul_u256<A: Into<Uint256>, B: Into<Uint256>>(
     a: A,
@@ -11,6 +21,19 @@ pub fn mul_u256<A: Into<Uint256>, B: Into<Uint256>>(
     a.checked_mul(b)
         .map_err(|e| ContractError::Std(StdError::overflow(e)))
 }
+
+
+pub fn div_u256<A: Into<Uint256>, B: Into<Uint256>>(
+    numerator: A,
+    denominator: B,
+) -> Result<Uint256, ContractError> {
+    let a: Uint256 = numerator.into();
+    let b: Uint256 = denominator.into();
+    a.checked_div(b)
+        .map_err(|e| ContractError::Std(StdError::divide_by_zero(e)))
+}
+
+// === i256 operations ===
 
 pub fn sub_i256<A: Into<Int256>, B: Into<Int256>>(
     a: A,
@@ -32,35 +55,7 @@ pub fn add_i256<A: Into<Int256>, B: Into<Int256>>(
         .map_err(|e| ContractError::Std(StdError::overflow(e)))
 }
 
-pub fn add_u256<A: Into<Uint256>, B: Into<Uint256>>(
-    a: A,
-    b: B,
-) -> Result<Uint256, ContractError> {
-    let a: Uint256 = a.into();
-    let b: Uint256 = b.into();
-    a.checked_add(b)
-        .map_err(|e| ContractError::Std(StdError::overflow(e)))
-}
-
-pub fn sub_u256<A: Into<Uint256>, B: Into<Uint256>>(
-    a: A,
-    b: B,
-) -> Result<Uint256, ContractError> {
-    let a: Uint256 = a.into();
-    let b: Uint256 = b.into();
-    a.checked_sub(b)
-        .map_err(|e| ContractError::Std(StdError::overflow(e)))
-}
-
-pub fn div_u256<A: Into<Uint256>, B: Into<Uint256>>(
-    numerator: A,
-    denominator: B,
-) -> Result<Uint256, ContractError> {
-    let a: Uint256 = numerator.into();
-    let b: Uint256 = denominator.into();
-    a.checked_div(b)
-        .map_err(|e| ContractError::Std(StdError::divide_by_zero(e)))
-}
+// === u128 operations ===
 
 pub fn add_u128<A: Into<Uint128>, B: Into<Uint128>>(
     a: A,
@@ -102,6 +97,8 @@ pub fn div_u128<A: Into<Uint128>, B: Into<Uint128>>(
         .map_err(|e| ContractError::Std(StdError::divide_by_zero(e)))
 }
 
+// === u64 operations ===
+
 pub fn sub_u64<A: Into<Uint64>, B: Into<Uint64>>(
     a: A,
     b: B,
@@ -121,6 +118,8 @@ pub fn add_u64<A: Into<Uint64>, B: Into<Uint64>>(
     a.checked_add(b)
         .map_err(|e| ContractError::Std(StdError::overflow(e)))
 }
+
+// === u32 operations (actively used) ===
 
 pub fn sub_u32(
     a: u32,

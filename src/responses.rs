@@ -1,3 +1,7 @@
+//! # Query Response Types
+//!
+//! Response structures returned by query handlers.
+
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{Addr, Timestamp};
 

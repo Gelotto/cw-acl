@@ -1,3 +1,7 @@
+//! # Grant Role to Principal
+//!
+//! Assigns a role to a principal with optional TTL.
+
 use crate::{
     error::ContractError,
     math::add_u32,
@@ -9,6 +13,9 @@ use cosmwasm_std::{attr, Response};
 
 use super::Context;
 
+/// Grants a role to a principal, incrementing the role's principal count.
+///
+/// Fails if role doesn't exist. Creates authorization record with optional expiration.
 pub fn exec_grant_role(
     ctx: Context,
     msg: GrantRoleMsg,

@@ -1,3 +1,7 @@
+//! # Revoke Role from Principal
+//!
+//! Removes a role assignment from a principal.
+
 use cosmwasm_std::{attr, Response};
 
 use crate::{
@@ -9,6 +13,7 @@ use crate::{
 
 use super::Context;
 
+/// Revokes a principal's role membership, decrementing the role's principal count.
 pub fn exec_revoke_role(
     ctx: Context,
     msg: RevokeRoleMsg,
@@ -32,7 +37,7 @@ pub fn exec_revoke_role(
         },
     )?;
 
-    // Disassciate the role from the principal
+    // Disassociate the role from the principal
     PRINCIPAL_ROLE_AUTHORIZATIONS.remove(deps.storage, (&principal, &role));
 
     Ok(Response::new().add_attributes(vec![
