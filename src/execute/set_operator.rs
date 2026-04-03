@@ -14,6 +14,16 @@ pub fn exec_set_operator(
 ) -> Result<Response, ContractError> {
     let Context { deps, .. } = ctx;
     let old_operator = OP.load(deps.storage)?;
+
+    // Validate the new operator address
+    deps.api.addr_validate(
+        match &new_operator {
+            Operator::Address(addr) => addr,
+            Operator::Acl(addr) => addr,
+        }
+        .as_str(),
+    )?;
+
     OP.save(deps.storage, &new_operator)?;
     Ok(Response::new().add_attributes(vec![
         attr("action", "set_operator"),

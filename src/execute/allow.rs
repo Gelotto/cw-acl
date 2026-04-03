@@ -35,7 +35,10 @@ pub fn exec_allow(
 
     let canonical_path = to_canonical_path(&path);
 
-    PATH_REF_COUNTS.save(deps.storage, &canonical_path, &0)?;
+    let ref_count = PATH_REF_COUNTS
+        .may_load(deps.storage, &canonical_path)?
+        .unwrap_or(0);
+    PATH_REF_COUNTS.save(deps.storage, &canonical_path, &(ref_count + 1))?;
     PRINCIPAL_PATH_AUTHORIZATIONS.save(deps.storage, (&principal, &canonical_path), &auth)?;
 
     Ok(Response::new().add_attributes(vec![

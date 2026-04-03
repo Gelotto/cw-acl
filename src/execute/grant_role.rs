@@ -31,20 +31,27 @@ pub fn exec_grant_role(
         expires_at: ttl.and_then(|n| Some(env.block.time.plus_seconds(n.into()))),
     };
 
-    ROLE_INFOS.update(
-        deps.storage,
-        &role,
-        |maybe_info| -> Result<_, ContractError> {
-            if let Some(mut info) = maybe_info {
-                info.n_principals = add_u32(info.n_principals, 1)?;
-                Ok(info)
-            } else {
-                Err(ContractError::NotAuthorized {
-                    reason: format!("role {} does not exist", role),
-                })
-            }
-        },
-    )?;
+    // Only increment n_principals if the principal doesn't already have this role
+    let already_granted = PRINCIPAL_ROLE_AUTHORIZATIONS
+        .may_load(deps.storage, (&principal, &role))?
+        .is_some();
+
+    if !already_granted {
+        ROLE_INFOS.update(
+            deps.storage,
+            &role,
+            |maybe_info| -> Result<_, ContractError> {
+                if let Some(mut info) = maybe_info {
+                    info.n_principals = add_u32(info.n_principals, 1)?;
+                    Ok(info)
+                } else {
+                    Err(ContractError::NotAuthorized {
+                        reason: format!("role {} does not exist", role),
+                    })
+                }
+            },
+        )?;
+    }
 
     PRINCIPAL_ROLE_AUTHORIZATIONS.save(deps.storage, (&principal, &role), &auth)?;
 

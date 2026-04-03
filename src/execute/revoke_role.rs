@@ -21,6 +21,17 @@ pub fn exec_revoke_role(
     let Context { deps, .. } = ctx;
     let RevokeRoleMsg { principal, role } = msg;
 
+    // Only decrement n_principals if the grant actually exists
+    let grant_exists = PRINCIPAL_ROLE_AUTHORIZATIONS
+        .may_load(deps.storage, (&principal, &role))?
+        .is_some();
+
+    if !grant_exists {
+        return Err(ContractError::NotAuthorized {
+            reason: format!("principal {} does not have role {}", principal, role),
+        });
+    }
+
     // Decrement the total number of principals associated with the role
     ROLE_INFOS.update(
         deps.storage,

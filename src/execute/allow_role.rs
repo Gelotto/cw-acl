@@ -25,7 +25,10 @@ pub fn exec_allow_role(
 
     let canonical_path = to_canonical_path(&path);
 
-    PATH_REF_COUNTS.save(deps.storage, &canonical_path, &0)?;
+    let ref_count = PATH_REF_COUNTS
+        .may_load(deps.storage, &canonical_path)?
+        .unwrap_or(0);
+    PATH_REF_COUNTS.save(deps.storage, &canonical_path, &(ref_count + 1))?;
     ROLE_PATHS.save(deps.storage, (&role, &canonical_path), &0)?;
     PATH_ROLES.save(deps.storage, (&canonical_path, &role), &0)?;
 
